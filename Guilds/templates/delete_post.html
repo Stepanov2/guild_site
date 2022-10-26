@@ -1,0 +1,19 @@
+{% extends 'default.html' %}
+{% load customfilters %}
+
+{% block title %}
+Подтвердите удаление {{ post.title }}
+{% endblock title %}
+
+{% block content %}
+<h3>Вы точно хотите УДОЛИТЬ "{{ post.title }}"?</h3>
+    <h4 class="text-danger">Это действие - необратимо!.</h4>
+<form action="" method="post">
+    {% csrf_token %}
+    <input class="bg-danger text-white" type="submit" value="Да, УДОЛИТЬ!" />
+</form>
+<hr style="margin-top:10px">
+{% include 'post.html' with render_comments=False short_preview=False %}
+
+
+{% endblock content %}

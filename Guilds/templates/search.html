@@ -1,0 +1,56 @@
+{% extends 'default.html' %}
+{% load customfilters %}
+
+{% block title %}
+{{ view_title }}
+{% endblock title %}
+
+
+{% block content %}
+<h2>{{ view_title }}</h2>
+<div class="filters">
+
+      <form action="" method="get">
+          {{ filterset.form.as_p }}
+          <input type="submit" value="Искать!">
+      </form>
+      <hr>
+
+</div>
+{% if show_results %}
+    {% if posts %}
+        {% for post in posts %}
+           {% include 'post.html' with object=post render_comments=False short_preview=True %}
+        {% endfor %}
+    {% else %}
+        <h2 class="text-danger">С прискорбием сообщаем вам, что по вашему запросу ничего не найдено=(</h2>
+    {% endif %}
+
+    {% if page_obj.has_previous or page_obj.has_next %}
+
+    <div class="page_scroller">
+         <span class="text-muted">страницы:</span>
+       {% if page_obj.has_previous %}
+
+    <span class="badge rounded-pill bg-info"><a href="?{% url_replace page=1 %}">1</a></span>
+           {% if page_obj.previous_page_number != 1 %}
+               ...
+    <span class="badge rounded-pill bg-info"><a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a></span>
+           {% endif %}
+       {% endif %}
+
+       {# Информация о текущей странице #}
+    <span class="badge rounded-pill bg-success">{{ page_obj.number }}</span>
+
+       {# Информация о следующих страницах #}
+       {% if page_obj.has_next %}
+    <span class="badge rounded-pill bg-info"><a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a></span>
+           {% if paginator.num_pages != page_obj.next_page_number %}
+               ...
+    <span class="badge rounded-pill bg-info"><a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a></span>
+           {% endif %}
+       {% endif %}
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock content %}
