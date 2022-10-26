@@ -101,18 +101,17 @@ class AuthCode(BaseModel):
 
 class Category(BaseModel):
     title = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
     class Meta:
         ordering = ['title']
 
     def __str__(self):
-        return self.title
+        return f'{self.slug}: {self.title}'
 
 
 class Post(BaseModel):
     user = models.ForeignKey(SiteUser, on_delete=models.CASCADE)
-    slug = models.SlugField()
     title = models.CharField(max_length=200)
     body = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)

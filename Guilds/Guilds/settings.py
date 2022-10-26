@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'guild_site.views.add_categories_to_context',
             ],
         },
     },
@@ -169,7 +170,7 @@ ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 60
 SITE_ID = 1
 
 # custom form that will link user account to bbw.siteuser model
-# ACCOUNT_FORMS = {'signup': 'bbw.forms.BBWSignupForm'}
+ACCOUNT_FORMS = {'signup': 'guild_site.forms.CustomSignupForm'}
 
 
 EMAIL_HOST = "app.debugmail.io"

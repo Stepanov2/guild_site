@@ -22,20 +22,18 @@
         <!-- Responsive navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="/">Новости и всякое</a>
+                <a class="navbar-brand" href="/">SuperRPG fan site. </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item"><a class="nav-link" href="/search">Поиск</a></li>
-                        {% if perms.bbw.add_post %}
-                        <li class="nav-item"><a class="nav-link" href="/posts/new_news">Добавить новость</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/posts/new_article">Добавить статью</a></li>
-                        {% endif %}
-                        <li class="nav-item"><a class="nav-link" href="/news">Только новости</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/articles">Только всякое</a></li>
-
                         {% if user.is_authenticated %}
-                            subscriptions
+                            {% if perms.guild_site.add_post %}
+                                <li class="nav-item"><a class="nav-link" href="/new_post">Добавить объяву</a></li>
+                            {% else %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'verify_user' %}">Завершить регистрацию.</a></li>
+                            {% endif %}
+
                             <li class="nav-item bg-info"><a class="nav-link text-black text-bold" href="{% url 'edit_profile' %}">Профиль.</a></li>
                             <li class="nav-item bg-success"><a class="nav-link" href="{% url 'account_logout' %}">Выход ({% user_display user %})</a></li>
                         {% else %}
@@ -55,10 +53,10 @@
                <div class="col-lg-12 text-center">
                    <h1>{{title}}</h1>
                    {% if user.is_authenticated %}
-                        {% if not user|has_group:"author" %}
+                        {% if not perms.guild_site.add_post %}
                             <h3 class="text-danger">Эй, ты! Да-да, ты!</h3>
-                            <p class="text-center">Я вижу ты всё ещё не автор! Это срочно нужно исправить.</p>
-                            <p class="text-center btn btn-danger"><a class="text-white" href="{% url 'become_author' %}">Жми сюда скорее!</a></p>
+                            <p class="text-center">Ты всё ещё не подтвердил свой аккаунт!</p>
+                            <p class="text-center btn btn-danger"><a class="text-white" href="{% url 'verify_user' %}">Жми сюда скорее!</a></p>
                         {% endif %}
                    {% endif %}
                </div>

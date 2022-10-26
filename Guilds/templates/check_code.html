@@ -1,0 +1,31 @@
+{% extends 'default.html' %}
+{% load customfilters %}
+
+{% block title %}
+Редактирование профиля для {{site_user.username}}
+{% endblock title %}
+
+{% block content %}
+<h2>Привет, {{ user.username }} .</h2>
+
+<p>Введите код, отправленный вам на электронную почту, указанную при регистрации.</p>
+{% if form.errors%}
+        <div class="alert alert-danger" role="alert">
+            <div id="form_errors">
+                {% for key, value in form.errors.items %}
+                    <p><strong>{{ value }}</strong></p>
+                {% endfor %}
+            </div>
+        </div>
+<hr style="margin-top:10px">
+{% endif %}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Проверить." />
+</form>
+<hr>
+
+<hr style="margin-top:10px">
+<a href="{% url 'new_code' %}">Выслать код повторно.</a>
+{% endblock content %}
