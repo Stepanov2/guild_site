@@ -68,10 +68,21 @@ def post_list_view(request, slug=None):  # slug for category, if none is specifi
 
 
 def post_detail_view(request, slug, pk):  # todo 404 error checking
+    reply_result = ''
     post = Post.objects.prefetch_related('reply_set').get(id=pk)
-    comment_form = ReplyForm()
+    reply_form = ReplyForm()
+    if request.method == 'POST':
+        reply_form = ReplyForm(request.POST)
+        if reply_form.is_valid():
+            Reply.objects.create(user=request.user.siteuser, post=post, body=reply_form.cleaned_data['body'])
+            reply_form = ReplyForm()
+            post = Post.objects.prefetch_related('reply_set').get(id=pk)  # need to re-fetch new reply
+            reply_result = 'Успешно добавили ваш отклик. Отклик ожидает утверждения автором объявления.'
+        else:
+            reply_result = 'Не удалось запостить ваш отклик, потому что' + str(reply_form.errors)
     return render(request, 'posts.html', {'post': post,
-                                          'comment_form': comment_form})
+                                          'reply_form': reply_form,
+                                          'reply_result': reply_result})
 
 
 def my_replies_view(request):

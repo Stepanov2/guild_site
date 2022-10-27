@@ -1,12 +1,14 @@
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save, post_delete, pre_delete, m2m_changed
+from django.db.models.signals import post_save, post_delete, pre_delete, m2m_changed, pre_save
 from django.template.loader import render_to_string
 from django.dispatch import receiver  # импортируем нужный декоратор
 import re
 # from bbw.tasks import send_single_email
-from .models import Post, SiteUser, AuthCode, Category, STRIP_HTML_TAGS
+from .models import Post, SiteUser, AuthCode, Category, STRIP_HTML_TAGS, Reply
 from .tasks import send_single_email
 
+REPLY_SUCCESS_TEXT = 'принял ваш отклик. Радостно!'
+REPLY_FAIL_TEXT = 'октлонил ваш отклик. Горестно!'
 
 def has_group(user, group_id):
     return user.groups.filter(pk=group_id).exists()
@@ -42,6 +44,34 @@ def email_code(sender, instance: AuthCode, created=False, **kwargs):
                             body=f'Ваш код: {instance.code}',
                             from_email='test@testing.time',
                             to_emails=[instance.user.user.email])
+
+
+@receiver(post_save, sender=Reply)
+def email_on_reply_creation(sender, instance: Reply, created=False, **kwargs):
+    if created:  # send e-mail to post creator
+        send_single_email.delay(subject=f'{instance.user.username} откликнулся на ваше объявление{instance.post.title[:40]}',
+                                body=f'Увидеть свои отклики вы можете по адресу http://127.0.0.1:8000/my_replies\n{instance.body}',
+                                from_email='test@testing.time',
+                                to_emails=[instance.post.user.user.email])
+
+
+@receiver(pre_save, sender=Reply)
+def email_on_reply_status_change(sender, instance: Reply, **kwargs):
+    if instance.id is not None:
+        prior_state = Reply.objects.get(id=instance.id)
+        if prior_state.approved != instance.approved:
+            if instance.approved is None:
+                return
+            if instance.approved:
+                subject = f'{instance.post.user.username} {REPLY_SUCCESS_TEXT}'
+            else:
+                subject = f'{instance.post.user.username} {REPLY_FAIL_TEXT}'
+            send_single_email.delay(
+                subject=subject,
+                body=f'Ваш отклик:\n{instance.body}',
+                from_email='test@testing.time',
+                to_emails=[instance.user.user.email])
+
 
 
 

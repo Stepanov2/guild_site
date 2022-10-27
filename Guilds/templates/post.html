@@ -44,10 +44,10 @@
             <span class="badge rounded-pill bg-danger">
                 <a href="{{''|abs_url}}{% url 'delete_post' post.pk %}" class="text-white">УДОЛИТЬ!</a>
             </span>
-
+          {% endif %}
 
         </div>
-      {% endif %}
+
     </article>
 <hr style="margin-top:10px">
 
@@ -56,6 +56,17 @@
     {% endif %}
 
 {% if render_comments %}
+    {% if request.user.siteuser.is_activated %}
+      <div class="add_reply">
+          <p><strong>{{reply_result|default:"Откликнуться на объявление."}}</strong></p>
+          <form method="post" action="">
+          {% csrf_token %}
+          {{ reply_form.as_p }}
+          <input type="submit" value="Отправить">
+          </form>
+      </div>
+
+    {% endif %}
 {%include 'replies.html' with replies=post.reply_set.all %}
 
 
