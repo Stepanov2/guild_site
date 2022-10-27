@@ -105,10 +105,10 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
-CACHES = {
+CACHES = {  # todo 'django.core.cache.backends.filebased.FileBasedCache'
     'default': {
         'TIMEOUT': 120,
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         'LOCATION': os.path.join(BASE_DIR, 'cache_files'),
     }
 }
@@ -166,7 +166,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 60
-
+ACCOUNT_SIGNUP_REDIRECT_URL = 'verify_user'
 SITE_ID = 1
 
 # custom form that will link user account to bbw.siteuser model

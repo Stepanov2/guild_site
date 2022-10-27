@@ -1,0 +1,33 @@
+{% load customfilters %}
+<div class="comments">
+<h3>Отклики</h3>
+    {% if not replies %}
+        <h3>Здесь пока ничего нет)</h3>
+    {% endif %}
+      {% for comment in replies %}
+
+            <div class="comment-badges">
+                <span class="text-muted">от:</span>
+                 <span class="badge rounded-pill bg-secondary">{{ comment.user }}</span>
+                {%if link_related_post%}
+                    <span class="text-muted">на объявление:</span>
+
+                        <span class="badge rounded-pill bg-secondary"><a href="{% url 'show_post' comment.post.category.slug comment.post.pk %}" style="color:#DDEEFF">{{ comment.post.title|truncatewords:5 }}</a></span>
+                {%endif%}
+                <span class="badge rounded-pill bg-secondary">{{ comment.created|date:'d M Y h:m'|default:"из недалекого будущего" }}</span>
+                <span class="text-muted">статус:</span>
+                {% if comment.approved is None %}
+                    <span class="badge rounded-pill bg-info">Ожидает одобрения.</span>
+                {% elif comment.approved %}
+                    <span class="badge rounded-pill bg-success">Одобрено!</span>
+                {% else %}
+                    <span class="badge rounded-pill bg-warning">Отклонено!</span>
+                {% endif %}
+            </div>
+            <div class="comment-body">
+                {{ comment.body |  no_naughty_words}}
+            </div>
+      <hr>
+      {% endfor %}
+
+</div>

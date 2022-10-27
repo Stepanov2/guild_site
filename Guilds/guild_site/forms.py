@@ -6,13 +6,15 @@ from django.utils import timezone
 from guild_site.models import SiteUser, Post, Reply, Category, AuthCode
 
 
-class CommentForm(forms.ModelForm):
-    pass
-
+class ReplyForm(forms.ModelForm):
+    class Meta:
+        model = Reply
+        fields = ['body']
 
 class PostForm(forms.ModelForm):
-    pass
-
+    class Meta:
+        model = Post
+        fields = ['body']
 
 class AuthCodeForm(forms.Form):
     pass

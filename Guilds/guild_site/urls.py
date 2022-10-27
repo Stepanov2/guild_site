@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import post_list_view, post_detail_view, comment_delete_view, post_delete_view, dummy_view, \
-    confirm_registration_view, new_code_view
+    confirm_registration_view, new_code_view, my_replies_view
 from django.views.decorators import cache
 
 
@@ -10,7 +10,7 @@ urlpatterns = [
     path('', post_list_view, name='all_posts'),
     path('category/<slug:slug>', post_list_view, name='posts_by_category'),
     path('category/<slug:slug>/<int:pk>', post_detail_view, name='show_post'),
-    path('news', dummy_view, name='news_posts'),
+    path('my_replies', my_replies_view, name='my_replies'),
     path('articles', dummy_view, name='non_news_posts'),
     path('posts/<int:pk>', dummy_view, name='show_post'),
     path('posts/new', dummy_view, name='new_post'),

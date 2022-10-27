@@ -1,7 +1,7 @@
 {% load account %}
 {% load customfilters %}
 {% load cache %}
-{% cache 500 header request.user.username request.user.siteuser.is_author %}
+{% cache 500 header request.user.username request.user.siteuser.is_activated request.user.siteuser.is_editor %}
 <!DOCTYPE html>
 <html lang="ru">
     <head>
@@ -26,10 +26,18 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link" href="/search">Поиск</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Категории</a>
+                            <ul class="dropdown-menu">
+                                {% for category in categories %}
+                                   <li></li><a class="dropdown-item" href="/category/{{category.slug}}" >{{category.title}}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
                         {% if user.is_authenticated %}
                             {% if perms.guild_site.add_post %}
                                 <li class="nav-item"><a class="nav-link" href="/new_post">Добавить объяву</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'my_replies' %}">Мои отклики</a></li>
                             {% else %}
                                 <li class="nav-item"><a class="nav-link" href="{% url 'verify_user' %}">Завершить регистрацию.</a></li>
                             {% endif %}
@@ -49,7 +57,7 @@
 
         <!-- Page content-->
        <div class="container">
-           <div class="row">
+
                <div class="col-lg-12 text-center">
                    <h1>{{title}}</h1>
                    {% if user.is_authenticated %}
@@ -59,16 +67,17 @@
                             <p class="text-center btn btn-danger"><a class="text-white" href="{% url 'verify_user' %}">Жми сюда скорее!</a></p>
                         {% endif %}
                    {% endif %}
+                   {% endcache %}
+                    {% block content %}
+                        ......
+                    {% endblock content %}
+                {% cache 500 footer %}
                </div>
            </div>
 
-           <div class="row">
-{% endcache %}
-               {% block content %}
-                ......
-               {% endblock content %}
-{% cache 500 footer %}
-           </div>
+
+
+
            <div class="row">
                <div class="col-lg-12 text-center">
                    <hr>
