@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
-from .models import Category, AuthCode, Post, Reply
+from .models import Category, AuthCode, Post, Reply, SiteUser
 from .filters import ReplyFilter
 from .forms import ReplyForm, DeleteForm, ConfirmRegistrationForm, PostForm, ManageSubscriptionsForm
 
@@ -49,6 +49,8 @@ def new_code_view(request):
 
 
 def post_list_view(request, slug=None):  # slug for category, if none is specified - we are on the main page.
+    postset = None;
+    valid_user = None
     if slug is not None:
 
         category = Category.objects.filter(slug=slug).first()
@@ -58,6 +60,13 @@ def post_list_view(request, slug=None):  # slug for category, if none is specifi
 
     else:
         postset = Post.objects.all()
+    if request.GET.get('author'):
+        try:
+            valid_user = SiteUser.objects.filter(pk=int(request.GET.get('author'))).exists()
+        except ValueError:
+            pass
+        if valid_user:
+            postset = postset.filter(user_id=int(request.GET.get('author')))
 
     page = request.GET.get('page', 1)
     paginator = Paginator(postset, 2)

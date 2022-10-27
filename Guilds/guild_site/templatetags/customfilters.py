@@ -43,3 +43,18 @@ def define(val=None):
 def abs_url(val=''):
   HOST='http://127.0.0.1:8000'
   return HOST + val
+
+
+@register.filter
+def pagination_prepare(url: str) -> str:
+    """Returns url with either ? or & at the end, so you can safely add another get parameter
+    Note: anything after "#" will be discarded"""
+
+    url = url.split('#')[0]
+    url = re.sub('page=\d+', '', url)
+    print(url)
+    if url[-1] in ('?', '&'):
+        return url
+    if url.find('?') == -1:
+        return f'{url}?'
+    return f'{url}&'

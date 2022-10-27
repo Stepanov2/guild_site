@@ -23,7 +23,7 @@
       <ul class="pagination justify-content-center">
         {% if posts.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ posts.previous_page_number }}" aria-label="Previous">
+            <a class="page-link" href="{{ request.get_full_path|pagination_prepare}}page={{ posts.previous_page_number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
@@ -37,13 +37,13 @@
           {% if posts.number == p %}
             <li class="page-item"><a class="page-link" style="color: red;" href="#">{{ p }}</a></li>
           {% else %}
-            <li class="page-item"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+            <li class="page-item"><a class="page-link" href="{{ request.get_full_path|pagination_prepare}}page={{ p }}">{{ p }}</a></li>
           {% endif %}
         {% endfor %}
 
         {% if posts.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ posts.next_page_number }}" aria-label="Next">
+            <a class="page-link" href="{{ request.get_full_path|pagination_prepare }}page={{ posts.next_page_number }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
