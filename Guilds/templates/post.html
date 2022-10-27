@@ -15,7 +15,7 @@
         <div class="post-badges">
             <span class="text-muted">автор:</span>
             <span class="badge rounded-pill bg-secondary">
-                <a href="{{'/?author='|abs_url}}{{post.author.pk}}" class="text-white">{{ post.user }}</a>
+                <a href="{{'/?author='|abs_url}}{{post.user.pk}}" class="text-white">{{ post.user }}</a>
             </span>
             <span class="badge rounded-pill bg-secondary">{{ post.created|date:'d M Y'|default:"из недалекого будущего" }}</span>
             <span class="text-muted">рубрика:</span>
@@ -44,9 +44,10 @@
             <span class="badge rounded-pill bg-danger">
                 <a href="{{''|abs_url}}{% url 'delete_post' post.pk %}" class="text-white">УДОЛИТЬ!</a>
             </span>
+            </div>
           {% endif %}
 
-        </div>
+
 
     </article>
 <hr style="margin-top:10px">

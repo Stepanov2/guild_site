@@ -1,3 +1,4 @@
+import django.http
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import F
 from django.http import HttpResponseNotFound
@@ -7,8 +8,9 @@ from django.contrib.auth.models import Group
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
+from .models import Category, AuthCode, Post, Reply
+from .filters import ReplyFilter
 from .forms import ReplyForm, DeleteForm, ConfirmRegistrationForm, PostForm, ManageSubscriptionsForm
-from .models import Post, SiteUser, Category, AuthCode, Reply
 
 
 # Create your views here.
@@ -16,11 +18,13 @@ from .models import Post, SiteUser, Category, AuthCode, Reply
 # BEGIN context processors
 
 
+
 def add_categories_to_context(request):
     """Context processor that adds list of categories to context(for menu rendering)"""
     return {'categories': Category.objects.all()}
 
-# todo: view_title
+# todo: view_title for everything
+@login_required
 def confirm_registration_view(request):
 
     if request.method == 'GET':
@@ -36,7 +40,7 @@ def confirm_registration_view(request):
             return redirect(to='/')
         return render(request, 'check_code.html', {'form': form})
 
-
+@login_required
 def new_code_view(request):
     if request.user.siteuser.is_activated:
         return redirect('/')
@@ -71,7 +75,7 @@ def post_list_view(request, slug=None):  # slug for category, if none is specifi
 def post_detail_view(request, slug, pk):
     reply_result = ''
     try:
-        post = Post.objects.prefetch_related('reply_set').get(id=pk)
+        post = Post.objects.prefetch_related('reply_set').order_by(F('approved').desc(nulls_first=True),'created').get(id=pk)
     except Post.DoesNotExist:
         raise Http404
     reply_form = ReplyForm()
@@ -88,7 +92,7 @@ def post_detail_view(request, slug, pk):
                                           'reply_form': reply_form,
                                           'reply_result': reply_result})
 
-
+@login_required
 def post_create_edit_view(request, pk=None):
     post = None
     if not request.user.pk or not request.user.siteuser.is_activated:
@@ -125,13 +129,17 @@ def post_create_edit_view(request, pk=None):
         else:
             return render(request, 'edit_post.html', {'form': form})
 
-
+@login_required
 def my_replies_view(request):
+
     user = request.user.siteuser
     replies = Reply.objects.prefetch_related('post', 'post__category').filter(post__user=user).order_by(F('approved').desc(nulls_first=True), '-created')
-    return render(request, 'my_replies.html', {'replies': replies})
+    filtered_replies = ReplyFilter(request.GET, user=user, queryset=replies)
+    return render(request, 'my_replies.html', {'replies': filtered_replies.qs,
+                                               'reply_browser': True,
+                                               'filterset': filtered_replies})
 
-
+@login_required
 def post_delete_view(request, pk):  # todo
     post = get_object_or_404(Post, id=pk)
     if post.user.pk != request.user.id:
@@ -145,7 +153,7 @@ def post_delete_view(request, pk):  # todo
     else:
         return render(request, 'delete_post.html', {'post': post, 'form': post_delete_form})
 
-
+@login_required
 def manage_subscription_view(request):
     if not request.user.pk:
         raise PermissionDenied
@@ -160,7 +168,20 @@ def manage_subscription_view(request):
     form = ManageSubscriptionsForm(instance=request.user.siteuser)
     return render(request, 'list_subscriptions.html', {'form': form, 'message': message})
 
+@login_required
+def update_reply_status(request: django.http.HttpRequest):
+    print(request.GET)
+    reply = get_object_or_404(Reply, pk=request.GET.get('reply'))
+    if reply.post.user.user != request.user:
+        raise PermissionDenied
+    try:
+        reply.approved = bool(request.GET.get('vote'))
+    except ValueError:
+        raise PermissionDenied
+    reply.save()
+    return redirect(request.GET.get('return_to') if request.GET.get('return_to') else '/')
 
+@login_required
 def comment_delete_view(request):  # maybe in next version=)
     return render(request, 'dummy.html', {})
 

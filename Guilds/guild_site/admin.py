@@ -8,6 +8,10 @@ class SubscriptionsAdminInline(admin.TabularInline):
     extra = 1
 
 
+def send_whenever(modeladmin, request, queryset):
+
+    queryset.update(finalized=True,)
+
 def send_in_1(modeladmin, request, queryset):
 
     queryset.update(finalized=True, sending_time=timezone.now() + timezone.timedelta(minutes=1))
@@ -23,6 +27,7 @@ def send_in_30(modeladmin, request, queryset):
     queryset.update(finalized=True, sending_time=timezone.now() + timezone.timedelta(minutes=30))
 
 
+send_whenever.short_description = 'Финализировать и запланировать отправку тогда, когда указано в свойствах письма.'
 send_in_1.short_description = 'Финализировать и запланировать отправку через 1 минуту.'
 send_in_5.short_description = 'Финализировать и запланировать отправку через 5 минут.'
 send_in_30.short_description = 'Финализировать и запланировать отправку через 30 минут.'

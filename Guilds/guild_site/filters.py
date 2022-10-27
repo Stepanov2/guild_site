@@ -1,18 +1,15 @@
 from django_filters import FilterSet
-from .models import Post
+from .models import Post, Reply
 
 
-# class PostFilter(FilterSet):
-#     class Meta:
-#         model = Post
-#         fields = {
-#             'author': ['exact'],
-#             'is_article': ['exact'],
-#             'title': ['contains'],
-#             'content': ['contains'],
-#             'publication_date': ['exact', 'year__exact'],
-#             'category': ['exact'],
-#             'tags': ['exact'],
-#
-#         }
-#
+class ReplyFilter(FilterSet):
+    def __init__(self, *args, user, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        self.filters['post'].queryset = Post.objects.filter(user=self.user, reply__isnull=False)
+
+    class Meta:
+        model = Reply
+        fields = {
+            'post': ['exact'],
+        }

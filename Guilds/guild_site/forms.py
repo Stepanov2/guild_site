@@ -62,3 +62,4 @@ class ManageSubscriptionsForm(forms.ModelForm):
         model = SiteUser
         fields = ['subscription']
 
+

@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import post_list_view, post_detail_view, comment_delete_view, post_delete_view, dummy_view, \
-    confirm_registration_view, new_code_view, my_replies_view, post_create_edit_view, manage_subscription_view
+    confirm_registration_view, new_code_view, my_replies_view, post_create_edit_view, manage_subscription_view, \
+    update_reply_status
 from django.views.decorators import cache
 
 
@@ -18,6 +19,7 @@ urlpatterns = [
     path('new_code', new_code_view, name='new_code'),
     path('subscriptions', manage_subscription_view, name='subscriptions'),
     path('edit_profile', dummy_view, name='edit_profile'),
+    path('reply_status', update_reply_status, name='reply_status'),
 
 
 ]

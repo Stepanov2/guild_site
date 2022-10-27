@@ -5,7 +5,10 @@
         <h3>Здесь пока ничего нет)</h3>
     {% endif %}
       {% for comment in replies %}
-
+            {% if reply_browser %}
+                {% define comment.post as post %}
+            {% endif %}
+            {% if request.user.pk == post.user.pk or request.user.pk == comment.user.pk or comment.approved %}
             <div class="comment-badges">
                 <span class="text-muted">от:</span>
                  <span class="badge rounded-pill bg-secondary">{{ comment.user }}</span>
@@ -14,10 +17,17 @@
 
                         <span class="badge rounded-pill bg-secondary"><a href="{% url 'show_post' comment.post.category.slug comment.post.pk %}" style="color:#DDEEFF">{{ comment.post.title|truncatewords:5 }}</a></span>
                 {%endif%}
-                <span class="badge rounded-pill bg-secondary">{{ comment.created|date:'d M Y h:m'|default:"из недалекого будущего" }}</span>
+                <span class="badge rounded-pill bg-secondary">{{ comment.created|date:"DATETIME_FORMAT"|default:"из недалекого будущего" }}</span>
                 <span class="text-muted">статус:</span>
                 {% if comment.approved is None %}
                     <span class="badge rounded-pill bg-info">Ожидает одобрения.</span>
+
+                    {% if request.user.pk == post.user.pk %}
+                        <span class="badge rounded-pill bg-success"><a href="{% url 'reply_status' %}?return_to={{request.path}}&reply={{comment.id}}&vote=True" class="text-white">Одобрить!</a></span>
+                        <span class="badge rounded-pill bg-danger"><a href="{% url 'reply_status' %}?return_to={{request.path}}&reply={{comment.id}}&vote=" class="text-white">Отклонить!</a></span>
+
+                    {% endif %}
+
                 {% elif comment.approved %}
                     <span class="badge rounded-pill bg-success">Одобрено!</span>
                 {% else %}
@@ -28,6 +38,7 @@
                 {{ comment.body |  no_naughty_words}}
             </div>
       <hr>
+        {% endif %}
       {% endfor %}
 
 </div>

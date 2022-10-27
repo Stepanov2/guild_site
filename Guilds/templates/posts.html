@@ -8,23 +8,7 @@
 
 {% block content %}
 <h2>{{ view_title }}</h2>
-{% if not post %}
-<div class="filters">
-    <p>
-  <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
-    Показать/скрыть фильтры.
-  </button>
-</p>
-<div class="collapse" id="collapseFilters">
-  <div class="card card-body">
-      <form action="" method="get">
-          {{ filterset.form.as_p }}
-          <input type="submit" value="Фильтруем-с!">
-      </form>
-      <hr>
-  </div>
-</div>
-{% endif %}
+
     {% if posts %}
         {% for post in posts %}
             {% include 'post.html' with render_comments=False short_preview=True %}
