@@ -5,8 +5,9 @@ from django.shortcuts import render, get_list_or_404, get_object_or_404, redirec
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import Group
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
-
-from .forms import ReplyForm, DeleteForm, ConfirmRegistrationForm
+from django.http import Http404
+from django.core.exceptions import PermissionDenied
+from .forms import ReplyForm, DeleteForm, ConfirmRegistrationForm, PostForm
 from .models import Post, SiteUser, Category, AuthCode, Reply
 
 
@@ -67,9 +68,12 @@ def post_list_view(request, slug=None):  # slug for category, if none is specifi
     return render(request, 'posts.html', {'posts': posts})
 
 
-def post_detail_view(request, slug, pk):  # todo 404 error checking
+def post_detail_view(request, slug, pk):
     reply_result = ''
-    post = Post.objects.prefetch_related('reply_set').get(id=pk)
+    try:
+        post = Post.objects.prefetch_related('reply_set').get(id=pk)
+    except Post.DoesNotExist:
+        raise Http404
     reply_form = ReplyForm()
     if request.method == 'POST':
         reply_form = ReplyForm(request.POST)
@@ -85,20 +89,64 @@ def post_detail_view(request, slug, pk):  # todo 404 error checking
                                           'reply_result': reply_result})
 
 
+def post_create_edit_view(request, pk=None):
+    post = None
+    if not request.user.pk or not request.user.siteuser.is_activated:
+        raise PermissionDenied
+    if pk is None:
+        form = PostForm()
+    else:
+        try:
+            post = Post.objects.get(id=pk)
+        except Post.DoesNotExist:
+            raise Http404
+        if post.user.user != request.user:
+            raise PermissionDenied
+        form = PostForm(instance=post)
+    if request.method == 'GET':
+        return render(request, 'edit_post.html', {'form': form})
+    elif request.method == 'POST':
+        form = PostForm(request.POST)
+        # print(form.__dict__)
+        if form.is_valid():
+            print(form.cleaned_data)
+            print(request.POST)
+            if post:
+                post.title = form.cleaned_data['title']
+                post.body = form.cleaned_data['body']
+                post.category = form.cleaned_data['category']
+                post.save()
+            else:
+                Post.objects.create(user=request.user.siteuser,
+                                    title=form.cleaned_data['title'],
+                                    category=form.cleaned_data['category'],
+                                    body=form.cleaned_data['body'])
+            return redirect('/')  # todo
+        else:
+            return render(request, 'edit_post.html', {'form': form})
+
+
 def my_replies_view(request):
     user = request.user.siteuser
     replies = Reply.objects.prefetch_related('post', 'post__category').filter(post__user=user).order_by(F('approved').desc(nulls_first=True), '-created')
     return render(request, 'my_replies.html', {'replies': replies})
 
 
-def post_delete_view(request, pk): # todo
+def post_delete_view(request, pk):  # todo
     post = get_object_or_404(Post, id=pk)
+    if post.user.pk != request.user.id:
+        raise PermissionDenied
     post_delete_form = DeleteForm()
-    return render(request, 'delete_post.html', {'post': post,
-                                                'post_delete_form': post_delete_form})
+    if request.method == 'GET':
+        return render(request, 'delete_post.html', {'post': post, 'form': post_delete_form})
+    if request.method == 'POST' and request.POST.get('confirmation'):
+        post.delete()
+        return redirect('/')
+    else:
+        return render(request, 'delete_post.html', {'post': post, 'form': post_delete_form})
 
 
-def comment_delete_view(request):
+def comment_delete_view(request):  # maybe in next version=)
     return render(request, 'delete_comment.html', {})
 
 

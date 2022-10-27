@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     # ... include the providers you want to enable:
     'allauth.socialaccount.providers.google',
+    'ckeditor',
+    'ckeditor_uploader'
 
 
 
@@ -195,4 +197,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BROKER_TRANSPORT_OPTION = {'visibility_timeout': 3600}
 PREFETCH_MULTIPLIER = 1
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_PATH = 'media'
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_IMAGE_BACKEND = 'ckeditor_uploader.backends.PillowBackend'
+CKEDITOR_THUMBNAIL_SIZE = (150, 150)
+CKEDITOR_FORCE_JPEG_COMPRESSION = True
+CKEDITOR_IMAGE_QUALITY = 89
+CKEDITOR_RESTRICT_BY_USER = True
 

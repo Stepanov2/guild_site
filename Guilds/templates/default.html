@@ -36,7 +36,7 @@
                         </li>
                         {% if user.is_authenticated %}
                             {% if perms.guild_site.add_post %}
-                                <li class="nav-item"><a class="nav-link" href="/new_post">Добавить объяву</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'new_post' %}">Добавить объяву</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{% url 'my_replies' %}">Мои отклики</a></li>
                             {% else %}
                                 <li class="nav-item"><a class="nav-link" href="{% url 'verify_user' %}">Завершить регистрацию.</a></li>

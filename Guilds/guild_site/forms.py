@@ -11,17 +11,15 @@ class ReplyForm(forms.ModelForm):
         model = Reply
         fields = ['body']
 
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['body']
-
-class AuthCodeForm(forms.Form):
-    pass
+        fields = ['title', 'category', 'body']
 
 
 class DeleteForm(forms.Form):
-    pass
+    confirmation = forms.BooleanField(label='ДА, Я ВСЁ ПОДТВЕРЖДАЮ!')
 
 
 class ConfirmRegistrationForm(forms.Form):
