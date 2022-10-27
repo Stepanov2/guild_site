@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
-from .forms import ReplyForm, DeleteForm, ConfirmRegistrationForm, PostForm
+from .forms import ReplyForm, DeleteForm, ConfirmRegistrationForm, PostForm, ManageSubscriptionsForm
 from .models import Post, SiteUser, Category, AuthCode, Reply
 
 
@@ -146,8 +146,23 @@ def post_delete_view(request, pk):  # todo
         return render(request, 'delete_post.html', {'post': post, 'form': post_delete_form})
 
 
+def manage_subscription_view(request):
+    if not request.user.pk:
+        raise PermissionDenied
+    message = ''
+    if request.method == 'POST':
+        form = ManageSubscriptionsForm(request.POST)
+        if form.is_valid():
+            siteuser = request.user.siteuser
+            siteuser.subscription.set(form.cleaned_data['subscription'])
+            siteuser.save()
+            message = 'Подписки обновлены!'
+    form = ManageSubscriptionsForm(instance=request.user.siteuser)
+    return render(request, 'list_subscriptions.html', {'form': form, 'message': message})
+
+
 def comment_delete_view(request):  # maybe in next version=)
-    return render(request, 'delete_comment.html', {})
+    return render(request, 'dummy.html', {})
 
 
 def dummy_view(request):

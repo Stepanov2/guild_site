@@ -42,7 +42,7 @@
                                 <li class="nav-item"><a class="nav-link" href="{% url 'verify_user' %}">Завершить регистрацию.</a></li>
                             {% endif %}
 
-                            <li class="nav-item bg-info"><a class="nav-link text-black text-bold" href="{% url 'edit_profile' %}">Профиль.</a></li>
+                            <li class="nav-item bg-info"><a class="nav-link text-black text-bold" href="{% url 'subscriptions' %}">Управление подписками.</a></li>
                             <li class="nav-item bg-success"><a class="nav-link" href="{% url 'account_logout' %}">Выход ({% user_display user %})</a></li>
                         {% else %}
                             <li class="nav-item bg-success"><a class="nav-link text-black text-bold" href="{% url 'account_login' %}">Вход</a></li>
