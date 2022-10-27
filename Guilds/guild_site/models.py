@@ -65,12 +65,14 @@ class MailingListSubscribers(BaseModel):
 class Email(BaseModel):
     mailing_list = models.ForeignKey(MailingList, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    body = models.TextField()
-    finalized = models.BooleanField(default=False)
+    body = RichTextUploadingField()
+    finalized = models.BooleanField(default=False,
+                                    help_text='Нажмите это чтобы отправить письмо. Иначе письмо считается черновиком.')
     sending_time = models.DateTimeField(null=True, blank=True)
+    sent = models.BooleanField(default=False, editable=False)
 
     class Meta:
-        ordering = ['-finalized', 'sending_time']
+        ordering = ['sent', 'finalized', 'sending_time']
 
     def __str__(self):
         return self.title

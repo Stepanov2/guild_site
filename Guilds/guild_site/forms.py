@@ -55,3 +55,10 @@ class CustomSignupForm(SignupForm):
             raise ValidationError('Пользователь с таким ником уже существует.')
 
         return cleaned_data
+
+
+class ManageSubscriptionsForm(forms.ModelForm):
+    class Meta:
+        model = SiteUser
+        fields = ['subscription']
+

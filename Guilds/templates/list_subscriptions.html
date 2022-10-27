@@ -13,18 +13,7 @@
 {% endif %}
     <form class="" method="post">
         {% csrf_token %}
-        <h4>Категории</h4>
-        <table class="categories">
-            {% include 'list_things.html' with checked_objects=user_cats unchecked_objects=cats field_prefix='cat' %}
-
-        </table>
-        <h4>Теги</h4>
-        <table class="categories">
-            {% include 'list_things.html' with checked_objects=user_tags unchecked_objects=tags field_prefix='tags' %}
-
-        </table>
-
-
+        {{form.as_p}}
         <input type="submit" value="Обновить подписки." />
     </form>
 

@@ -18,7 +18,9 @@ from django.template.loader import render_to_string
 #
 # from d5 import get_random_sentences
 #
-from guild_site.models import Post, SiteUser, AuthCode, STRIP_HTML_TAGS
+from django.utils import timezone
+
+from guild_site.models import Post, SiteUser, AuthCode, STRIP_HTML_TAGS, Email, MailingList
 #
 import pytz
 
@@ -28,9 +30,9 @@ utc = pytz.UTC
 POSTS_INTERVAL = 60*60*24*7  # seconds
 
 
-# @shared_task
-# def hello():
-#     print(get_random_sentences())
+@shared_task
+def hello():
+    print('=)' * 10)
 
 
 @shared_task
@@ -66,63 +68,24 @@ def send_single_email(subject: str,
 
     return f'Sent a letter "{subject}" to {str(to_emails)}'
 
-
 @shared_task
-def weekly_digest() -> str:
-    """Make personalized emails for every User that subscribed to something"""
-    one_week_ago = datetime.now() - timedelta(seconds=POSTS_INTERVAL)
-    all_site_users = SiteUser.objects.all()
-    for user in all_site_users:
-        if not (user.category_set.all() or user.tags_set.all()):
-            print(f'{user} has no active subscriptions')
-            continue
-        else:
-            posts_for_user = []
-            print(f'{user} HAS active subscriptions!', end=' ')
-            # getting posts for users
-
-            # COMMENT THESE LINES FOR PRODUCTION
-            # these are for debug (no date filtering = lots of posts to include in e-mail)
-            posts_for_user.extend(Post.objects.filter(category__in=user.category_set.all()))
-            posts_for_user.extend(Post.objects.filter(tags__in=user.tags_set.all()))
-
-            # UNCOMMENT THESE LINES FOR PRODUCTION
-            # posts_for_user.extend(Post.objects.filter(category__in=user.category_set.all(),
-            #                                           publication_date__gt=one_week_ago,
-            #                                           publication_date__lt=datetime.now(tz=utc)))
-            # posts_for_user.extend(Post.objects.filter(tags__in=user.tags_set.all(),
-            #                                           publication_date__gt=one_week_ago,
-            #                                           publication_date__lt=datetime.now(tz=utc)))
-
-            if not len(posts_for_user):
-                print(f'Nothing to send to {user} this week, sadly!')
-                continue
-
-            posts_for_user = list(set(posts_for_user))
-            posts_for_user = sorted(posts_for_user,
-                                    key=lambda x: x.publication_date if x.publication_date is not None
-                                    else utc.localize(datetime(year=2050, month=1, day=1, hour=0, minute=0, second=0)),
-                                    reverse=True)
-            # Todo: above voodoo should not be necessary once I finally implement Post.is_published signal
-            # print(posts_for_user)
-
-            # rendering html body
+def send_mass_email() -> str:
+    emails_to_send = Email.objects.filter(finalized=True, sent=False, sending_time__lte=timezone.now())
+    if not emails_to_send:
+        return 'Nothing to send!'
+    else:
+        for email in emails_to_send:
+            print(f'Found email {email.title}')
             html = render_to_string('email_header.html')
-            for post in posts_for_user:
-                html += render_to_string('post.html', {'post': post,
-                                                       'render_comments': False,
-                                                       'short_preview': True,
-                                                       }) + '\n\n\n'
+            html += str(email.body).replace('<img src="', '<img src="http://127.0.0.1:8000')
             html += render_to_string('email_footer.html')
-
-            subject = f'Твой еже-{POSTS_INTERVAL}-секундный дайджест новостей от Newsandstuff, {user}'
-            send_single_email.delay(subject=subject,
-                                    html_body=html,
-                                    from_email='test@testing.time',
-                                    to_emails=[user.user.email])
-            print(f'PLANNED an email for {user}!')
-
-    return f'Successfully created tasks for weekly digest!'
-
-
+            users = email.mailing_list.subscribers.all()
+            for user in users:
+                send_single_email.delay(subject=email.title,
+                                        html_body=html,
+                                        from_email='test@testing.time',
+                                        to_emails=[user.user.email])
+                print(f'PLANNED an email for {user}!')
+            email.sent = True
+            email.save()
 
